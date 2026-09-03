@@ -9,65 +9,64 @@
     <style>
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
         body { font-family: 'Pretendard', sans-serif; -webkit-tap-highlight-color: transparent; background-color: #f8fafc; }
-        .tab-active { color: #2563eb; font-weight: 800; border-bottom: 4px solid #2563eb; }
+        .tab-active { color: #2563eb !important; font-weight: 800; border-bottom: 4px solid #2563eb; }
         .form-input { background-color: #ffffff; border: 2px solid #f1f5f9; border-radius: 1.25rem; padding: 1rem 1.25rem; width: 100%; font-weight: 600; }
-        .form-input:focus { border-color: #3b82f6; outline: none; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
+        .form-input:focus { border-color: #3b82f6; outline: none; }
         .toggle-btn { transition: all 0.2s; font-weight: 800; border-radius: 1rem; padding: 0.5rem 1rem; font-size: 0.75rem; }
-        .active-blue { background-color: #2563eb; color: white; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); }
-        .active-cash { background-color: #f59e0b; color: white; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2); }
-        .active-card { background-color: #6366f1; color: white; box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2); }
+        .active-blue { background-color: #2563eb; color: white; }
+        .active-cash { background-color: #f59e0b; color: white; }
+        .active-card { background-color: #6366f1; color: white; }
         .inactive-btn { background-color: #f1f5f9; color: #94a3b8; }
         .member-chip { padding: 0.5rem 1rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 800; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
         .chip-selected { border-color: #2563eb; background-color: #eff6ff; color: #2563eb; }
         .chip-unselected { background-color: #f1f5f9; color: #cbd5e1; }
         .expense-row { display: grid; grid-template-columns: 55px 1fr 100px 35px; gap: 10px; align-items: start; padding: 14px 10px; border-bottom: 1px solid #f1f5f9; }
-        .trip-completed { opacity: 0.6; filter: grayscale(0.5); }
     </style>
 </head>
 <body class="text-slate-900 pb-32">
 
-    <!-- 로그인 섹션 -->
+    <!-- 1. 로그인 섹션 -->
     <div id="auth-section" class="max-w-md mx-auto mt-20 p-8 bg-white rounded-[2.5rem] shadow-2xl hidden mx-4">
-        <h2 class="text-3xl font-black mb-8 text-slate-800 tracking-tight">Travel Log</h2>
+        <h2 class="text-3xl font-black mb-8 text-slate-800">Travel Log</h2>
         <div class="space-y-4">
-            <input type="email" id="email" placeholder="이메일" class="form-input shadow-sm">
-            <input type="password" id="password" placeholder="비밀번호" class="form-input shadow-sm">
-            <button onclick="handleLogin()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold text-lg">로그인</button>
-            <button onclick="handleSignUp()" class="w-full text-slate-400 py-2 text-sm font-bold">계정 만들기</button>
+            <input type="email" id="email" placeholder="이메일" class="form-input">
+            <input type="password" id="password" placeholder="비밀번호" class="form-input">
+            <button onclick="handleLogin()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold">로그인</button>
+            <button onclick="handleSignUp()" class="w-full text-slate-400 py-2 text-sm font-bold">회원가입</button>
         </div>
     </div>
 
-    <!-- 앱 메인 -->
+    <!-- 2. 메인 앱 섹션 -->
     <div id="app-section" class="hidden">
         <header class="bg-white/90 backdrop-blur-md p-6 border-b flex justify-between items-center sticky top-0 z-50">
-            <h1 class="font-black text-2xl text-blue-600 tracking-tighter italic">TRAVEL LOG</h1>
-            <button onclick="handleLogout()" class="text-[10px] font-black text-slate-400 bg-slate-100 px-4 py-2 rounded-xl border border-slate-100">LOGOUT</button>
+            <h1 class="font-black text-2xl text-blue-600 italic">TRAVEL LOG</h1>
+            <button onclick="handleLogout()" class="text-xs font-bold text-slate-400 bg-slate-50 px-3 py-2 rounded-xl">로그아웃</button>
         </header>
 
-        <!-- 하단 바 -->
+        <!-- 하단 내비게이션 -->
         <nav class="fixed bottom-8 left-1/2 -translate-x-1/2 w-[92%] max-w-md bg-white rounded-[2.5rem] flex justify-around p-2 z-50 shadow-2xl border border-slate-100">
-            <button id="tab-btn-input" onclick="showTab('input')" class="flex-1 py-4 text-center rounded-[1.5rem] font-black text-sm">기록</button>
-            <button id="tab-btn-list" onclick="showTab('list')" class="flex-1 py-4 text-center rounded-[1.5rem] font-black text-sm">목록</button>
-            <button id="tab-btn-settle" onclick="showTab('settle')" class="flex-1 py-4 text-center rounded-[1.5rem] font-black text-sm">정산</button>
+            <button id="tab-btn-input" onclick="showTab('input')" class="flex-1 py-4 text-center rounded-[1.5rem] font-black text-sm text-slate-300">기록</button>
+            <button id="tab-btn-list" onclick="showTab('list')" class="flex-1 py-4 text-center rounded-[1.5rem] font-black text-sm text-slate-300">목록</button>
+            <button id="tab-btn-settle" onclick="showTab('settle')" class="flex-1 py-4 text-center rounded-[1.5rem] font-black text-sm text-slate-300">정산</button>
         </nav>
 
         <main class="max-w-md mx-auto p-4">
-            <!-- 탭 1: 기록 -->
+            <!-- 기록 탭 -->
             <section id="tab-input" class="hidden space-y-4">
-                <div id="no-trip-msg" class="bg-white p-12 rounded-[2.5rem] text-center shadow-lg border border-slate-100 hidden">
-                    <p class="text-slate-400 mb-6 font-bold">기록 중인 여행이 없습니다.</p>
-                    <button onclick="showTab('list')" class="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold">목록에서 선택</button>
+                <div id="no-trip-msg" class="bg-white p-12 rounded-[2.5rem] text-center border-2 border-dashed border-slate-200 hidden">
+                    <p class="text-slate-400 mb-6 font-bold">선택된 여행이 없습니다.</p>
+                    <button onclick="showTab('list')" class="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold">여행 목록으로</button>
                 </div>
                 <div id="input-form" class="hidden bg-white p-7 rounded-[2.5rem] shadow-xl border border-slate-100 space-y-6">
                     <div class="flex justify-between items-center pb-4 border-b">
                         <h2 id="current-trip-name" class="text-xl font-black text-slate-800 truncate pr-2"></h2>
                         <div class="flex bg-slate-100 p-1 rounded-xl">
-                            <button id="type-pre" onclick="setExpType('사전')" class="px-4 py-1.5 text-xs rounded-lg font-black transition-all">사전</button>
-                            <button id="type-act" onclick="setExpType('현지')" class="px-4 py-1.5 text-xs rounded-lg font-black transition-all">현지</button>
+                            <button id="type-pre" onclick="setExpType('사전')" class="px-4 py-1.5 text-xs rounded-lg font-black">사전</button>
+                            <button id="type-act" onclick="setExpType('현지')" class="px-4 py-1.5 text-xs rounded-lg font-black">현지</button>
                         </div>
                     </div>
                     <div class="space-y-4">
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Who Paid? (누가 냈어?)</label>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Who Paid? (결제자)</label>
                         <div id="payer-list" class="flex flex-wrap gap-2"></div>
                         <div class="flex gap-2">
                             <input type="date" id="exp-date" class="form-input font-bold text-slate-600">
@@ -78,15 +77,15 @@
                         </div>
                         <input type="text" id="exp-name" placeholder="항목명" class="form-input text-lg font-bold">
                         <input type="number" id="exp-amount" placeholder="금액" class="form-input text-3xl font-black text-blue-600">
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Split With (함께 쓴 사람)</label>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Split With (함께 쓴 사람)</label>
                         <div id="split-list" class="flex flex-wrap gap-2"></div>
-                        <textarea id="exp-memo" placeholder="메모를 남겨보세요" class="form-input h-24 text-sm"></textarea>
-                        <button id="save-btn" onclick="saveExpense()" class="w-full bg-blue-600 text-white py-6 rounded-[2rem] font-black text-xl shadow-xl shadow-blue-100 active:scale-95 transition-all">기록 저장하기</button>
+                        <textarea id="exp-memo" placeholder="상세 메모" class="form-input h-24 text-sm"></textarea>
+                        <button id="save-btn" onclick="saveExpense()" class="w-full bg-blue-600 text-white py-5 rounded-[2rem] font-black text-xl shadow-xl shadow-blue-100">기록 저장</button>
                     </div>
                 </div>
             </section>
 
-            <!-- 탭 2: 목록 -->
+            <!-- 목록 탭 -->
             <section id="tab-list" class="hidden space-y-6">
                 <div class="flex justify-between items-center px-2">
                     <h2 class="font-black text-2xl text-slate-800">내 여행</h2>
@@ -95,13 +94,13 @@
                 <div id="trip-card-container" class="space-y-4"></div>
             </section>
 
-            <!-- 탭 3: 정산 -->
+            <!-- 정산 탭 -->
             <section id="tab-settle" class="hidden space-y-4">
-                <h2 class="font-black text-2xl text-slate-800 px-2 mb-4 italic">Settlement</h2>
+                <h2 class="font-black text-2xl text-slate-800 px-2 mb-4">최종 정산서</h2>
                 <div id="settle-result-container" class="space-y-4 pb-20"></div>
             </section>
 
-            <!-- 탭 4: 상세 (리스트) -->
+            <!-- 상세 탭 -->
             <section id="tab-detail" class="hidden space-y-4">
                 <div class="flex items-center gap-3 px-2">
                     <button onclick="showTab('list')" class="bg-white p-2 rounded-xl shadow-sm text-slate-400 font-bold">←</button>
@@ -114,7 +113,7 @@
                     <div class="bg-slate-800 p-4 rounded-3xl text-white shadow-lg"><p class="text-[10px] font-black text-slate-400 mb-1">사전 합계</p><p id="sum-pre" class="font-black text-xl">0</p></div>
                     <div class="bg-blue-600 p-4 rounded-3xl text-white shadow-lg shadow-blue-100"><p class="text-[10px] font-black text-blue-200 mb-1">현지 합계</p><p id="sum-act" class="font-black text-xl">0</p></div>
                 </div>
-                <div class="bg-white rounded-[2.5rem] shadow-sm p-2 min-h-[400px]">
+                <div class="bg-white rounded-[2.5rem] p-2 min-h-[400px]">
                     <div id="expense-list-container"></div>
                 </div>
             </section>
@@ -122,12 +121,12 @@
     </div>
 
     <script>
-        // 1. 설정
+        // 1. Supabase 초기화
         const SUPABASE_URL = 'https://ejalawrpzmbanhjkfwxr.supabase.co'; 
         const SUPABASE_KEY = 'sb_publishable_AVP0pqFeMHynravz8dd_nw___4f9zQo';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // 2. 상태 변수
+        // 2. 전역 상태
         let currentUser = null;
         let currentTripId = localStorage.getItem('lastTripId');
         let currentTripName = localStorage.getItem('lastTripName');
@@ -151,41 +150,34 @@
         }
 
         async function handleLogin() {
-            const e = document.getElementById('email').value.trim();
-            const p = document.getElementById('password').value.trim();
+            const e = document.getElementById('email').value;
+            const p = document.getElementById('password').value;
             const { error } = await _supabase.auth.signInWithPassword({ email: e, password: p });
-            if (error) alert("로그인 실패: " + error.message); 
-            else location.reload();
+            if (error) alert(error.message); else location.reload();
         }
 
         async function handleSignUp() {
-            const e = document.getElementById('email').value.trim();
-            const p = document.getElementById('password').value.trim();
+            const e = document.getElementById('email').value;
+            const p = document.getElementById('password').value;
             const { error } = await _supabase.auth.signUp({ email: e, password: p });
-            if (error) alert("가입 실패: " + error.message); 
-            else alert('가입 성공! 이제 로그인하세요.');
+            if (error) alert(error.message); else alert('가입 성공! 로그인하세요.');
         }
 
-        async function handleLogout() {
-            await _supabase.auth.signOut();
-            location.reload();
-        }
+        function handleLogout() { _supabase.auth.signOut(); location.reload(); }
 
-        // 4. 탭 및 UI 제어
+        // 4. UI 제어 함수
         function showTab(tabName) {
-            const tabIds = ['tab-input', 'tab-list', 'tab-settle', 'tab-detail'];
-            tabIds.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.classList.add('hidden');
+            ['tab-input', 'tab-list', 'tab-settle', 'tab-detail'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
             });
-            
-            const target = document.getElementById(`tab-${tabName}`);
-            if (target) target.classList.remove('hidden');
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
 
-            const btns = ['input', 'list', 'settle'];
-            btns.forEach(id => {
+            ['input', 'list', 'settle'].forEach(id => {
                 const btn = document.getElementById(`tab-btn-${id}`);
-                if (btn) btn.className = `flex-1 py-4 text-center rounded-[1.5rem] font-black text-sm ${tabName === id ? 'text-blue-600 bg-blue-50' : 'text-slate-300'}`;
+                if (btn) {
+                    if (tabName === id) btn.classList.add('tab-active');
+                    else btn.classList.remove('tab-active');
+                }
             });
 
             if (tabName === 'input') refreshInputTab();
@@ -197,58 +189,35 @@
             selectedExpType = type;
             const preBtn = document.getElementById('type-pre');
             const actBtn = document.getElementById('type-act');
-            if(preBtn) preBtn.className = `px-4 py-1.5 text-xs rounded-lg font-black transition-all ${type==='사전'?'bg-slate-800 text-white shadow-md':'text-slate-400'}`;
-            if(actBtn) actBtn.className = `px-4 py-1.5 text-xs rounded-lg font-black transition-all ${type==='현지'?'bg-blue-600 text-white shadow-md':'text-slate-400'}`;
+            preBtn.className = `px-4 py-1.5 text-xs rounded-lg font-black ${type==='사전'?'bg-slate-800 text-white shadow-md':'text-slate-400'}`;
+            actBtn.className = `px-4 py-1.5 text-xs rounded-lg font-black ${type==='현지'?'bg-blue-600 text-white shadow-md':'text-slate-400'}`;
         }
 
         function setExpMethod(method) {
             selectedMethod = method;
             const cashBtn = document.getElementById('method-cash');
             const cardBtn = document.getElementById('method-card');
-            if(cashBtn) cashBtn.className = `flex-1 toggle-btn ${method==='현금'?'active-cash':'inactive-btn'}`;
-            if(cardBtn) cardBtn.className = `flex-1 toggle-btn ${method==='카드'?'active-card':'inactive-btn'}`;
+            cashBtn.className = `flex-1 toggle-btn ${method==='현금'?'active-cash':'inactive-btn'}`;
+            cardBtn.className = `flex-1 toggle-btn ${method==='카드'?'active-card':'inactive-btn'}`;
         }
 
-        // 5. 여행 데이터 관련 함수
+        // 5. 여행 데이터 함수
         async function loadTrips() {
-            const { data: trips, error } = await _supabase.from('trips').select('*').order('is_completed', { ascending: true }).order('created_at', { ascending: false });
+            const { data: trips } = await _supabase.from('trips').select('*').order('is_completed', { ascending: true }).order('created_at', { ascending: false });
             const container = document.getElementById('trip-card-container');
-            if (!container) return;
             container.innerHTML = '';
-            
-            if (trips) {
-                trips.forEach(trip => {
-                    const isActive = currentTripId == trip.id;
-                    const isComp = trip.is_completed;
-                    container.innerHTML += `
-                        <div class="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm ${isComp ? 'trip-completed' : ''}">
-                            <div class="flex justify-between items-start mb-4">
-                                <div onclick="showTripDetail(${trip.id}, '${trip.title}')" class="flex-1 cursor-pointer pr-4">
-                                    <h3 class="font-black text-slate-800 text-lg">${trip.title} ${isComp ? '✅' : ''}</h3>
-                                    <p class="text-[10px] font-bold text-slate-300 mt-1 uppercase">Show details</p>
-                                </div>
-                                ${!isComp ? `<button onclick="selectTrip(${trip.id}, '${trip.title}')" class="px-5 py-2.5 rounded-2xl text-[10px] font-black shrink-0 ${isActive ? 'bg-blue-600 text-white shadow-lg shadow-blue-100' : 'bg-slate-100 text-slate-400'}">${isActive ? '기록 중' : '기록 선택'}</button>` : ''}
+            trips?.forEach(trip => {
+                const isActive = currentTripId == trip.id;
+                container.innerHTML += `
+                    <div class="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm ${trip.is_completed?'opacity-50':''}">
+                        <div class="flex justify-between items-start mb-4">
+                            <div onclick="showTripDetail(${trip.id}, '${trip.title}')" class="flex-1 cursor-pointer">
+                                <h3 class="font-black text-slate-800 text-lg">${trip.title} ${trip.is_completed?'✅':''}</h3>
                             </div>
-                            <button onclick="toggleTripStatus(${trip.id}, ${isComp})" class="w-full py-2 text-[10px] font-black rounded-xl border border-slate-100 text-slate-400 bg-slate-50 uppercase tracking-widest">${isComp ? '다시 시작하기' : '여행 종료하기'}</button>
-                        </div>`;
-                });
-            }
-        }
-
-        async function createNewTrip() {
-            const title = prompt('여행 이름'); if (!title) return;
-            const membersStr = prompt('멤버 이름 (쉼표 구분: 나,철수,영희)'); if (!membersStr) return;
-            const members = membersStr.split(',').map(name => {
-                const n = name.trim();
-                const acc = prompt(`'${n}'의 계좌번호 (선택)`, '');
-                return { name: n, account: acc };
+                            ${!trip.is_completed ? `<button onclick="selectTrip(${trip.id}, '${trip.title}')" class="px-5 py-2.5 rounded-2xl text-xs font-black ${isActive ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400'}">${isActive ? '기록 중' : '기록 선택'}</button>` : ''}
+                        </div>
+                    </div>`;
             });
-            const { data, error } = await _supabase.from('trips').insert([{ title, members, user_id: currentUser.id }]).select();
-            if (data) {
-                selectTrip(data[0].id, data[0].title);
-            } else {
-                alert("생성 실패: " + error.message);
-            }
         }
 
         function selectTrip(id, title) {
@@ -257,42 +226,41 @@
             showTab('input');
         }
 
-        async function toggleTripStatus(id, currentStatus) {
-            if (!currentStatus && !confirm('여행을 종료할까요?')) return;
-            const { error } = await _supabase.from('trips').update({ is_completed: !currentStatus }).eq('id', id);
-            if (!currentStatus && currentTripId == id) { 
-                currentTripId = null; currentTripName = null;
-                localStorage.removeItem('lastTripId'); localStorage.removeItem('lastTripName');
-            }
-            loadTrips();
+        async function createNewTrip() {
+            const title = prompt('여행 이름'); if (!title) return;
+            const membersStr = prompt('멤버 이름 (쉼표 구분: 나,친구1,친구2)'); if (!membersStr) return;
+            const members = membersStr.split(',').map(n => {
+                const name = n.trim();
+                const account = prompt(`'${name}'의 계좌번호`, '');
+                return { name, account };
+            });
+            const { data } = await _supabase.from('trips').insert([{ title, members, user_id: currentUser.id }]).select();
+            if (data) loadTrips();
         }
 
-        // 6. 입력 및 정산 함수
+        // 6. 지출 및 정산 함수
         async function refreshInputTab() {
-            const form = document.getElementById('input-form');
-            const msg = document.getElementById('no-trip-msg');
             if (currentTripId) {
-                if(form) form.classList.remove('hidden');
-                if(msg) msg.classList.add('hidden');
+                document.getElementById('input-form').classList.remove('hidden');
+                document.getElementById('no-trip-msg').classList.add('hidden');
                 document.getElementById('current-trip-name').innerText = currentTripName;
                 document.getElementById('exp-date').valueAsDate = new Date();
-                setExpType('현지'); setExpMethod('현금');
-
+                
                 const { data: trip } = await _supabase.from('trips').select('members').eq('id', currentTripId).single();
                 currentTripMembers = trip?.members || [];
                 renderMemberChips();
+                setExpType('현지'); setExpMethod('현금');
             } else {
-                if(form) form.classList.add('hidden');
-                if(msg) msg.classList.remove('hidden');
+                document.getElementById('input-form').classList.add('hidden');
+                document.getElementById('no-trip-msg').classList.remove('hidden');
             }
         }
 
         function renderMemberChips() {
             const payerCont = document.getElementById('payer-list');
             const splitCont = document.getElementById('split-list');
-            if(!payerCont || !splitCont) return;
-            
             payerCont.innerHTML = ''; splitCont.innerHTML = '';
+
             if (selectedPayer === '' && currentTripMembers.length > 0) selectedPayer = currentTripMembers[0].name;
             if (selectedSplitMembers.length === 0) selectedSplitMembers = currentTripMembers.map(m => m.name);
 
@@ -316,47 +284,40 @@
         }
 
         async function saveExpense() {
-            const name = document.getElementById('exp-name').value.trim();
+            const name = document.getElementById('exp-name').value;
             const amount = document.getElementById('exp-amount').value;
-            if (!name || !amount || !selectedPayer || selectedSplitMembers.length === 0) {
-                alert('내용을 모두 채워주세요.'); return;
-            }
+            if (!name || !amount) return;
             const btn = document.getElementById('save-btn');
             btn.innerText = "저장 중...";
-            const { error } = await _supabase.from('expenses').insert([{ 
-                trip_id: currentTripId, item_name: name, amount, paid_by: selectedPayer, 
-                split_members: selectedSplitMembers, spent_at: document.getElementById('exp-date').value, 
-                payment_method: selectedMethod, memo: document.getElementById('exp-memo').value, expense_type: selectedExpType 
+            const { error } = await _supabase.from('expenses').insert([{
+                trip_id: currentTripId, item_name: name, amount, paid_by: selectedPayer,
+                split_members: selectedSplitMembers, spent_at: document.getElementById('exp-date').value,
+                payment_method: selectedMethod, memo: document.getElementById('exp-memo').value, expense_type: selectedExpType
             }]);
-            if (error) alert('저장 에러: ' + error.message); 
+            if (error) alert('실패');
             else {
-                document.getElementById('exp-name').value = ''; 
-                document.getElementById('exp-amount').value = ''; 
-                document.getElementById('exp-memo').value = '';
+                document.getElementById('exp-name').value = '';
+                document.getElementById('exp-amount').value = '';
                 btn.innerText = "저장 완료!";
-                setTimeout(() => { btn.innerText = "기록 저장하기"; }, 1000);
+                setTimeout(() => { btn.innerText = "기록 저장"; }, 1000);
             }
         }
 
         async function calculateSettlement() {
-            const tripId = localStorage.getItem('lastTripId'); if (!tripId) return;
+            const tripId = localStorage.getItem('lastTripId');
+            if (!tripId) return;
             const { data: trip } = await _supabase.from('trips').select('*').eq('id', tripId).single();
             const { data: expenses } = await _supabase.from('expenses').select('*').eq('trip_id', tripId);
             const container = document.getElementById('settle-result-container');
-            if(!container) return;
             container.innerHTML = '';
-            
+
             let balances = {};
             trip.members.forEach(m => balances[m.name] = 0);
             expenses?.forEach(exp => {
                 const amt = Number(exp.amount);
-                const payer = exp.paid_by;
-                const splitWith = exp.split_members || [];
-                if (splitWith.length > 0) {
-                    const share = amt / splitWith.length;
-                    balances[payer] += amt;
-                    splitWith.forEach(m => balances[m] -= share);
-                }
+                const share = amt / (exp.split_members?.length || 1);
+                balances[exp.paid_by] += amt;
+                exp.split_members?.forEach(m => balances[m] -= share);
             });
 
             let receivers = [], givers = [];
@@ -369,74 +330,55 @@
                 receivers.forEach(r => {
                     if (g.amt <= 0 || r.amt <= 0) return;
                     const payAmt = Math.min(g.amt, r.amt);
-                    const rAcc = trip.members.find(m => m.name === r.name).account || '계좌 정보 없음';
+                    const acc = trip.members.find(m => m.name === r.name)?.account || '계좌 없음';
                     container.innerHTML += `
-                        <div class="bg-white p-7 rounded-[2.5rem] shadow-xl border border-slate-50">
-                            <div class="text-xl font-black mb-2"><span class="text-red-500">${g.name}</span> → <span class="text-blue-600">${r.name}</span></div>
-                            <div class="text-3xl font-black mb-4">${Math.round(payAmt).toLocaleString()}원</div>
-                            <div class="bg-slate-50 p-4 rounded-2xl text-xs font-bold text-slate-500 italic tracking-tighter">🏦 ${rAcc}</div>
+                        <div class="bg-white p-7 rounded-[2.5rem] shadow-xl">
+                            <div class="text-xl font-black"><span class="text-red-500">${g.name}</span> → <span class="text-blue-600">${r.name}</span></div>
+                            <div class="text-3xl font-black my-2">${Math.round(payAmt).toLocaleString()}원</div>
+                            <div class="text-xs text-slate-400">🏦 ${acc}</div>
                         </div>`;
                     g.amt -= payAmt; r.amt -= payAmt;
                 });
             });
-            if (container.innerHTML === '') container.innerHTML = '<p class="text-center py-24 text-slate-400 font-black">정산할 내역이 없습니다.</p>';
+            if (!container.innerHTML) container.innerHTML = '<p class="text-center py-20">내역 없음</p>';
         }
 
         async function showTripDetail(tripId, title) {
             viewingTripId = tripId; showTab('detail');
             document.getElementById('detail-title').innerText = title;
             const { data: tripData } = await _supabase.from('trips').select('memo').eq('id', tripId).single();
-            const { data: expenses } = await _supabase.from('expenses').select('*').eq('id', tripId).order('spent_at', { ascending: false }); // 주의: trip_id가 아니라 id로 되어있을 수 있음
-            const realExpenses = await _supabase.from('expenses').select('*').eq('trip_id', tripId).order('spent_at', { ascending: false });
-            
+            const { data: expenses } = await _supabase.from('expenses').select('*').eq('trip_id', tripId).order('spent_at', { ascending: false });
             document.getElementById('trip-general-memo').value = tripData?.memo || '';
             const container = document.getElementById('expense-list-container');
-            let preTotal = 0, actTotal = 0; container.innerHTML = '';
-            
-            const list = realExpenses.data || [];
-            if(list.length === 0) {
-                container.innerHTML = '<p class="text-center py-24 text-slate-300 font-bold">내역이 없습니다.</p>';
-                document.getElementById('sum-pre').innerText = "0"; document.getElementById('sum-act').innerText = "0"; return;
-            }
-            list.forEach(exp => {
-                const type = exp.expense_type || '현지'; const isPre = type === '사전';
-                if(isPre) preTotal += Number(exp.amount); else actTotal += Number(exp.amount);
+            let pre = 0, act = 0; container.innerHTML = '';
+            expenses?.forEach(exp => {
+                if (exp.expense_type === '사전') pre += Number(exp.amount); else act += Number(exp.amount);
                 container.innerHTML += `
-                    <div class="expense-row">
-                        <div class="text-[10px] font-black ${isPre?'text-slate-300':'text-blue-400'} mt-1">${exp.spent_at?.slice(5)||'00-00'}</div>
-                        <div class="flex flex-col pr-1 overflow-hidden">
-                            <input type="text" onchange="updateExp(${exp.id},'item_name',this.value)" value="${exp.item_name}" class="font-black text-slate-800 bg-transparent text-[15px]">
-                            <input type="text" onchange="updateExp(${exp.id},'memo',this.value)" value="${exp.memo||''}" placeholder="메모..." class="text-[11px] text-slate-400 bg-transparent">
-                            <div class="flex items-center gap-1.5 mt-1.5"><span class="type-badge ${isPre?'badge-pre':'badge-act'}">${type}</span><span class="text-[9px] font-bold text-slate-300 uppercase">${exp.payment_method||''}</span></div>
+                    <div class="expense-row text-xs">
+                        <div class="text-slate-300 font-bold">${exp.spent_at.slice(5)}</div>
+                        <div>
+                            <div class="font-black text-slate-700">${exp.item_name}</div>
+                            <div class="text-[10px] text-slate-400">${exp.paid_by} 결제</div>
                         </div>
-                        <input type="number" onchange="updateExp(${exp.id},'amount',this.value)" value="${exp.amount}" class="font-black text-[18px] text-right ${isPre?'text-slate-400':'text-blue-600'} bg-transparent">
-                        <button onclick="deleteExp(${exp.id},${tripId},'${title}')" class="text-slate-200 mt-1">✕</button>
+                        <div class="text-right font-black ${exp.expense_type==='사전'?'text-slate-400':'text-blue-600'}">${Number(exp.amount).toLocaleString()}</div>
                     </div>`;
             });
-            document.getElementById('sum-pre').innerText = preTotal.toLocaleString();
-            document.getElementById('sum-act').innerText = actTotal.toLocaleString();
+            document.getElementById('sum-pre').innerText = pre.toLocaleString();
+            document.getElementById('sum-act').innerText = act.toLocaleString();
         }
 
         async function updateTripMemo() {
             const v = document.getElementById('trip-general-memo').value;
-            if (viewingTripId) await _supabase.from('trips').update({ memo: v }).eq('id', viewingTripId);
+            await _supabase.from('trips').update({ memo: v }).eq('id', viewingTripId);
         }
 
-        async function updateExp(id, f, v) { await _supabase.from('expenses').update({ [f]: v }).eq('id', id); }
-        async function deleteExp(id, tid, t) { if(confirm('삭제할까요?')) { await _supabase.from('expenses').delete().eq('id', id); showTripDetail(tid, t); } }
-
-        // 7. 초기화 실행
-        window.onload = async () => {
-            try {
-                const { data: { session } } = await _supabase.auth.getSession();
-                if (session) {
-                    currentUser = session.user;
-                    showApp();
-                } else {
-                    showAuth();
-                }
-            } catch (e) {
-                console.error("초기화 중 오류 발생:", e);
+        // 7. 초기화 실행 (가장 마지막에 배치)
+        window.onload = async function() {
+            const { data: { session } } = await _supabase.auth.getSession();
+            if (session) {
+                currentUser = session.user;
+                showApp();
+            } else {
                 showAuth();
             }
         };
