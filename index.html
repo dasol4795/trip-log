@@ -20,7 +20,7 @@
         .member-chip { padding: 0.5rem 1rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 800; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
         .chip-selected { border-color: #2563eb; background-color: #eff6ff; color: #2563eb; }
         .chip-unselected { background-color: #f1f5f9; color: #cbd5e1; }
-        .expense-row { display: grid; grid-template-columns: 55px 1fr 100px 35px; gap: 10px; align-items: start; padding: 16px 10px; border-bottom: 1px solid #f1f5f9; }
+        .expense-row { display: grid; grid-template-columns: 55px 1fr 100px 35px; gap: 10px; align-items: start; padding: 14px 10px; border-bottom: 1px solid #f1f5f9; }
         .share-hide { display: none !important; }
     </style>
 </head>
@@ -52,7 +52,7 @@
         </nav>
 
         <main class="max-w-md mx-auto p-4">
-            <!-- 기록 탭 -->
+            <!-- 탭 1: 기록 -->
             <section id="tab-input" class="hidden space-y-4">
                 <div id="no-trip-msg" class="bg-white p-12 rounded-[2.5rem] text-center shadow-lg border border-slate-100 hidden">
                     <p class="text-slate-400 mb-6 font-bold">기록 중인 여행이 없습니다.</p>
@@ -60,7 +60,7 @@
                 </div>
                 <div id="input-form" class="hidden bg-white p-7 rounded-[2.5rem] shadow-xl border border-slate-100 space-y-6">
                     <div class="flex justify-between items-center pb-4 border-b">
-                        <h2 id="current-trip-name" class="text-xl font-black text-slate-800 truncate pr-2"></h2>
+                        <h2 id="current-trip-name" class="text-xl font-black text-slate-800 truncate"></h2>
                         <div class="flex bg-slate-100 p-1 rounded-xl">
                             <button id="type-pre" onclick="setExpType('사전')" class="px-4 py-1.5 text-xs rounded-lg font-black transition-all">사전</button>
                             <button id="type-act" onclick="setExpType('현지')" class="px-4 py-1.5 text-xs rounded-lg font-black transition-all">현지</button>
@@ -86,16 +86,16 @@
                 </div>
             </section>
 
-            <!-- 목록 탭 -->
+            <!-- 탭 2: 목록 -->
             <section id="tab-list" class="hidden space-y-6">
                 <div class="flex justify-between items-center px-2">
-                    <h2 class="font-black text-2xl text-slate-800">내 여행</h2>
+                    <h2 class="font-black text-2xl text-slate-800 tracking-tighter">내 여행</h2>
                     <button id="btn-add-trip" onclick="createNewTrip()" class="bg-white text-blue-600 px-4 py-2 rounded-xl text-sm font-black shadow-sm">+ 추가</button>
                 </div>
                 <div id="trip-card-container" class="space-y-4"></div>
             </section>
 
-            <!-- 정산 탭 -->
+            <!-- 탭 3: 정산 -->
             <section id="tab-settle" class="hidden space-y-4">
                 <div class="px-4 py-5 bg-blue-600 rounded-[2rem] shadow-lg shadow-blue-100 text-white mb-6">
                     <p class="text-[10px] font-black text-blue-200 uppercase tracking-widest mb-1">Settlement for</p>
@@ -104,16 +104,17 @@
                 <div id="settle-result-container" class="space-y-4 pb-20"></div>
             </section>
 
-            <!-- 상세 탭 -->
+            <!-- 탭 4: 상세 (리스트) -->
             <section id="tab-detail" class="hidden space-y-4">
                 <div class="flex items-center justify-between px-2">
                     <div class="flex items-center gap-3">
                         <button onclick="showTab('list')" class="bg-white p-2 rounded-xl shadow-sm text-slate-400 font-bold">←</button>
-                        <h2 id="detail-title" class="font-black text-2xl text-slate-800 truncate max-w-[150px]"></h2>
+                        <h2 id="detail-title" class="font-black text-2xl text-slate-800 truncate max-w-[130px]"></h2>
                     </div>
-                    <div class="flex gap-2">
-                        <button id="btn-share" onclick="shareTrip()" class="text-xs font-bold bg-slate-100 text-slate-600 px-4 py-2 rounded-xl active:scale-95 transition-all">공유</button>
-                        <button onclick="goToSettleFromDetail()" class="text-xs font-bold bg-blue-600 text-white px-4 py-2 rounded-xl shadow-md active:scale-95 transition-all">정산서</button>
+                    <div class="flex gap-2 shrink-0">
+                        <!-- 공유 버튼 위치 확실히 고정 -->
+                        <button id="btn-share" onclick="shareTrip()" class="text-[10px] font-black bg-slate-100 text-slate-500 px-4 py-2 rounded-xl active:scale-95 transition-all">공유하기</button>
+                        <button onclick="goToSettleFromDetail()" class="text-[10px] font-black bg-blue-600 text-white px-4 py-2 rounded-xl shadow-md active:scale-95 transition-all">정산 확인</button>
                     </div>
                 </div>
                 <div class="bg-amber-50 p-6 rounded-[2.5rem] border border-amber-100 shadow-sm mx-1">
@@ -147,31 +148,26 @@
         let selectedPayer = '';
         let selectedSplitMembers = [];
 
-        // 1. 인증 및 공유모드 체크
+        // --- 인증 및 공유체크 ---
         function showAuth() { document.getElementById('auth-section').classList.remove('hidden'); document.getElementById('app-section').classList.add('hidden'); }
         function showApp() { document.getElementById('app-section').classList.remove('hidden'); document.getElementById('auth-section').classList.add('hidden'); showTab('input'); }
-
         async function handleLogin() {
-            const e = document.getElementById('email').value.trim();
-            const p = document.getElementById('password').value.trim();
+            const e = document.getElementById('email').value.trim(); const p = document.getElementById('password').value.trim();
             const { error } = await _supabase.auth.signInWithPassword({ email: e, password: p });
             if (error) alert(error.message); else location.reload();
         }
-
         async function handleSignUp() {
-            const e = document.getElementById('email').value.trim();
-            const p = document.getElementById('password').value.trim();
+            const e = document.getElementById('email').value.trim(); const p = document.getElementById('password').value.trim();
             const { error } = await _supabase.auth.signUp({ email: e, password: p });
             if (error) alert(error.message); else alert('가입 성공! 로그인하세요.');
         }
-
         function handleLogout() { _supabase.auth.signOut(); location.reload(); }
 
-        // 2. 탭 및 UI 제어
+        // --- 탭 제어 ---
         function showTab(tabName) {
-            if(isShareMode && (tabName === 'input' || tabName === 'list')) return; 
+            if(isShareMode && (tabName === 'input' || tabName === 'list')) return;
             ['tab-input', 'tab-list', 'tab-settle', 'tab-detail'].forEach(id => document.getElementById(id)?.classList.add('hidden'));
-            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabName}`)?.classList.remove('hidden');
 
             ['input', 'list', 'settle'].forEach(id => {
                 const btn = document.getElementById(`tab-btn-${id}`);
@@ -180,7 +176,6 @@
                     else btn.classList.remove('tab-active');
                 }
             });
-
             if (tabName === 'input') refreshInputTab();
             if (tabName === 'list') loadTrips();
             if (tabName === 'settle') calculateSettlement();
@@ -188,21 +183,18 @@
 
         function setExpType(type) {
             selectedExpType = type;
-            const preBtn = document.getElementById('type-pre');
-            const actBtn = document.getElementById('type-act');
+            const preBtn = document.getElementById('type-pre'); const actBtn = document.getElementById('type-act');
             preBtn.className = `px-4 py-1.5 text-xs rounded-lg font-black transition-all ${type==='사전'?'bg-slate-800 text-white shadow-md':'text-slate-400'}`;
             actBtn.className = `px-4 py-1.5 text-xs rounded-lg font-black transition-all ${type==='현지'?'bg-blue-600 text-white shadow-md':'text-slate-400'}`;
         }
 
         function setExpMethod(method) {
             selectedMethod = method;
-            const cashBtn = document.getElementById('method-cash');
-            const cardBtn = document.getElementById('method-card');
+            const cashBtn = document.getElementById('method-cash'); const cardBtn = document.getElementById('method-card');
             cashBtn.className = `flex-1 toggle-btn ${method==='현금'?'active-cash':'inactive-btn'}`;
             cardBtn.className = `flex-1 toggle-btn ${method==='카드'?'active-card':'inactive-btn'}`;
         }
 
-        // 3. 여행 관리
         async function loadTrips() {
             const { data: trips } = await _supabase.from('trips').select('*').order('is_completed', { ascending: true }).order('created_at', { ascending: false });
             const container = document.getElementById('trip-card-container');
@@ -214,7 +206,7 @@
                         <div class="flex justify-between items-start mb-4">
                             <div onclick="showTripDetail(${trip.id}, '${trip.title}')" class="flex-1 cursor-pointer pr-4">
                                 <h3 class="font-black text-slate-800 text-lg">${trip.title} ${trip.is_completed?'✅':''}</h3>
-                                <p class="text-[10px] font-bold text-slate-300 mt-1 uppercase">Settle & History</p>
+                                <p class="text-[10px] font-bold text-slate-300 mt-1 uppercase tracking-tighter">Settle & History</p>
                             </div>
                             ${!trip.is_completed ? `<button onclick="selectTrip(${trip.id}, '${trip.title}')" class="px-5 py-2.5 rounded-2xl text-[10px] font-black shrink-0 ${isActive ? 'bg-blue-600 text-white shadow-lg' : 'bg-slate-100 text-slate-400'}">${isActive ? '기록 중' : '기록 선택'}</button>` : ''}
                         </div>
@@ -226,10 +218,7 @@
         async function toggleTripStatus(id, currentStatus) {
             if(!currentStatus && !confirm('여행을 종료할까요?')) return;
             const { error } = await _supabase.from('trips').update({ is_completed: !currentStatus }).eq('id', id);
-            if(!error) {
-                if(!currentStatus && currentTripId == id) { currentTripId = null; currentTripName = null; localStorage.removeItem('lastTripId'); localStorage.removeItem('lastTripName'); }
-                loadTrips();
-            }
+            if(!error) { if(!currentStatus && currentTripId == id) { currentTripId = null; currentTripName = null; localStorage.removeItem('lastTripId'); localStorage.removeItem('lastTripName'); } loadTrips(); }
         }
 
         function selectTrip(id, title) {
@@ -241,70 +230,42 @@
         async function createNewTrip() {
             const title = prompt('여행 이름'); if (!title) return;
             const membersStr = prompt('멤버 이름 (쉼표 구분: 나,친구1,친구2)'); if (!membersStr) return;
-            const members = membersStr.split(',').map(n => {
-                const name = n.trim();
-                const account = prompt(`'${name}'의 계좌번호`, '');
-                return { name, account };
-            });
+            const members = membersStr.split(',').map(n => { const name = n.trim(); const account = prompt(`'${name}'의 계좌번호`, ''); return { name, account }; });
             const { data } = await _supabase.from('trips').insert([{ title, members, user_id: currentUser.id }]).select();
             if (data) loadTrips();
         }
 
-        // 4. 지출 및 정산
         async function refreshInputTab() {
-            const form = document.getElementById('input-form');
-            const msg = document.getElementById('no-trip-msg');
             if (currentTripId) {
-                form.classList.remove('hidden'); msg.classList.add('hidden');
+                document.getElementById('input-form').classList.remove('hidden'); document.getElementById('no-trip-msg').classList.add('hidden');
                 document.getElementById('current-trip-name').innerText = currentTripName;
-                document.getElementById('exp-date').valueAsDate = new Date();
                 const { data: trip } = await _supabase.from('trips').select('members').eq('id', currentTripId).single();
                 currentTripMembers = trip?.members || [];
-                renderMemberChips();
-                setExpType('현지'); setExpMethod('현금');
-            } else {
-                form.classList.add('hidden'); msg.classList.remove('hidden');
-            }
+                renderMemberChips(); setExpType('현지'); setExpMethod('현금');
+            } else { document.getElementById('input-form').classList.add('hidden'); document.getElementById('no-trip-msg').classList.remove('hidden'); }
         }
 
         function renderMemberChips() {
-            const payerCont = document.getElementById('payer-list');
-            const splitCont = document.getElementById('split-list');
+            const payerCont = document.getElementById('payer-list'); const splitCont = document.getElementById('split-list');
             if(!payerCont) return; payerCont.innerHTML = ''; splitCont.innerHTML = '';
             if (selectedPayer === '' && currentTripMembers.length > 0) selectedPayer = currentTripMembers[0].name;
             if (selectedSplitMembers.length === 0) selectedSplitMembers = currentTripMembers.map(m => m.name);
             currentTripMembers.forEach(m => {
-                const pChip = document.createElement('div');
-                pChip.className = `member-chip ${selectedPayer === m.name ? 'chip-selected' : 'chip-unselected'}`;
-                pChip.innerText = m.name; pChip.onclick = () => { selectedPayer = m.name; renderMemberChips(); };
-                payerCont.appendChild(pChip);
-                const sChip = document.createElement('div');
-                sChip.className = `member-chip ${selectedSplitMembers.includes(m.name) ? 'chip-selected' : 'chip-unselected'}`;
-                sChip.innerText = m.name;
-                sChip.onclick = () => {
-                    if (selectedSplitMembers.includes(m.name)) selectedSplitMembers = selectedSplitMembers.filter(n => n !== m.name);
-                    else selectedSplitMembers.push(m.name);
-                    renderMemberChips();
-                };
-                splitCont.appendChild(sChip);
+                const pChip = document.createElement('div'); pChip.className = `member-chip ${selectedPayer === m.name ? 'chip-selected' : 'chip-unselected'}`;
+                pChip.innerText = m.name; pChip.onclick = () => { selectedPayer = m.name; renderMemberChips(); }; payerCont.appendChild(pChip);
+                const sChip = document.createElement('div'); sChip.className = `member-chip ${selectedSplitMembers.includes(m.name) ? 'chip-selected' : 'chip-unselected'}`;
+                sChip.innerText = m.name; sChip.onclick = () => { if (selectedSplitMembers.includes(m.name)) selectedSplitMembers = selectedSplitMembers.filter(n => n !== m.name); else selectedSplitMembers.push(m.name); renderMemberChips(); }; splitCont.appendChild(sChip);
             });
         }
 
         async function saveExpense() {
-            const name = document.getElementById('exp-name').value;
-            const amount = document.getElementById('exp-amount').value;
-            if (!name || !amount) return;
-            const btn = document.getElementById('save-btn'); btn.innerText = "저장 중...";
-            await _supabase.from('expenses').insert([{
-                trip_id: currentTripId, item_name: name, amount, paid_by: selectedPayer,
-                split_members: selectedSplitMembers, spent_at: document.getElementById('exp-date').value,
-                payment_method: selectedMethod, memo: document.getElementById('exp-memo').value, expense_type: selectedExpType
-            }]);
+            const name = document.getElementById('exp-name').value; const amount = document.getElementById('exp-amount').value;
+            if (!name || !amount) return; const btn = document.getElementById('save-btn'); btn.innerText = "저장 중...";
+            await _supabase.from('expenses').insert([{ trip_id: currentTripId, item_name: name, amount, paid_by: selectedPayer, split_members: selectedSplitMembers, spent_at: document.getElementById('exp-date').value, payment_method: selectedMethod, memo: document.getElementById('exp-memo').value, expense_type: selectedExpType }]);
             document.getElementById('exp-name').value = ''; document.getElementById('exp-amount').value = ''; document.getElementById('exp-memo').value = '';
-            btn.innerText = "저장 완료!"; setTimeout(() => { btn.innerText = "기록 저장"; }, 1000);
+            btn.innerText = "저장 완료!"; setTimeout(() => { btn.innerText = "기록 완료"; }, 1000);
         }
 
-        // 5. 정산 및 상세 내역
         function goToSettleFromDetail() { currentTripId = viewingTripId; currentTripName = viewingTripName; showTab('settle'); }
 
         async function calculateSettlement() {
@@ -314,29 +275,15 @@
             document.getElementById('settle-trip-name').innerText = trip.title;
             const container = document.getElementById('settle-result-container'); container.innerHTML = '';
             let balances = {}; trip.members.forEach(m => balances[m.name] = 0);
-            expenses?.forEach(exp => {
-                const amt = Number(exp.amount); const share = amt / (exp.split_members?.length || 1);
-                balances[exp.paid_by] += amt; exp.split_members?.forEach(m => balances[m] -= share);
-            });
+            expenses?.forEach(exp => { const amt = Number(exp.amount); const share = amt / (exp.split_members?.length || 1); balances[exp.paid_by] += amt; exp.split_members?.forEach(m => balances[m] -= share); });
             let receivers = [], givers = [];
-            for (let name in balances) {
-                if (balances[name] > 1) receivers.push({ name, amt: balances[name] });
-                else if (balances[name] < -1) givers.push({ name, amt: Math.abs(balances[name]) });
-            }
-            givers.forEach(g => {
-                receivers.forEach(r => {
-                    if (g.amt <= 0 || r.amt <= 0) return;
-                    const payAmt = Math.min(g.amt, r.amt); const acc = trip.members.find(m => m.name === r.name)?.account || '계좌 없음';
-                    container.innerHTML += `<div class="bg-white p-7 rounded-[2.5rem] shadow-xl border border-slate-50"><div class="text-xl font-black mb-1"><span class="text-red-500">${g.name}</span> → <span class="text-blue-600">${r.name}</span></div><div class="text-3xl font-black mb-3">${Math.round(payAmt).toLocaleString()}원</div><div class="bg-slate-50 p-4 rounded-2xl text-xs font-bold text-slate-400 italic">🏦 ${acc}</div></div>`;
-                    g.amt -= payAmt; r.amt -= payAmt;
-                });
-            });
+            for (let name in balances) { if (balances[name] > 1) receivers.push({ name, amt: balances[name] }); else if (balances[name] < -1) givers.push({ name, amt: Math.abs(balances[name]) }); }
+            givers.forEach(g => { receivers.forEach(r => { if (g.amt <= 0 || r.amt <= 0) return; const payAmt = Math.min(g.amt, r.amt); const acc = trip.members.find(m => m.name === r.name)?.account || '계좌 없음'; container.innerHTML += `<div class="bg-white p-7 rounded-[2.5rem] shadow-xl border border-slate-50"><div class="text-xl font-black mb-1"><span class="text-red-500">${g.name}</span> → <span class="text-blue-600">${r.name}</span></div><div class="text-3xl font-black mb-3">${Math.round(payAmt).toLocaleString()}원</div><div class="bg-slate-50 p-4 rounded-2xl text-xs font-bold text-slate-400 italic">🏦 ${acc}</div></div>`; g.amt -= payAmt; r.amt -= payAmt; }); });
             if (!container.innerHTML) container.innerHTML = '<p class="text-center py-24 text-slate-400 font-black">정산할 내역이 없습니다.</p>';
         }
 
         async function showTripDetail(tripId, title) {
             viewingTripId = tripId; viewingTripName = title; showTab('detail');
-            document.getElementById('detail-title').innerText = title;
             const { data: tripData } = await _supabase.from('trips').select('*').eq('id', tripId).single();
             const { data: expenses } = await _supabase.from('expenses').select('*').eq('trip_id', tripId).order('spent_at', { ascending: false });
             if(tripData) document.getElementById('detail-title').innerText = tripData.title;
@@ -363,26 +310,21 @@
 
         async function updateExp(id, f, v) { if(isShareMode) return; await _supabase.from('expenses').update({ [f]: v }).eq('id', id); }
         async function deleteExp(id, tid, t) { if(isShareMode) return; if(confirm('삭제할까요?')) { await _supabase.from('expenses').delete().eq('id', id); showTripDetail(tid, t); } }
-        async function updateTripMemo() { if(isShareMode) return; const v = document.getElementById('trip-general-memo').value; if(viewingTripId) await _supabase.from('trips').update({ memo: v }).eq('id', viewingTripId); }
+        async function updateTripMemo() { if(isShareMode) return; const v = document.getElementById('trip-general-memo').value; await _supabase.from('trips').update({ memo: v }).eq('id', viewingTripId); }
 
         function shareTrip() {
             const shareUrl = `${window.location.origin}${window.location.pathname}?share=${viewingTripId}`;
-            navigator.clipboard.writeText(shareUrl).then(() => alert("공유 링크 복사 완료!")).catch(() => prompt("링크 복사:", shareUrl));
+            navigator.clipboard.writeText(shareUrl).then(() => alert("공유 링크가 복사되었습니다!")).catch(() => prompt("링크 복사:", shareUrl));
         }
 
-        // 6. 초기 실행 (공유모드 체크)
         window.onload = async function() {
             const params = new URLSearchParams(window.location.search);
             const shareId = params.get('share');
             if (shareId) {
-                isShareMode = true;
-                document.getElementById('app-section').classList.remove('hidden');
-                document.getElementById('btn-logout').classList.add('share-hide');
-                document.getElementById('bottom-nav').classList.add('share-hide');
-                document.getElementById('btn-share').classList.add('share-hide');
-                document.getElementById('btn-add-trip').classList.add('share-hide');
-                document.getElementById('trip-general-memo').readOnly = true;
-                showTripDetail(shareId, 'Shared Trip');
+                isShareMode = true; document.getElementById('app-section').classList.remove('hidden');
+                document.getElementById('btn-logout').classList.add('share-hide'); document.getElementById('bottom-nav').classList.add('share-hide');
+                document.getElementById('btn-share').classList.add('share-hide'); document.getElementById('btn-add-trip').classList.add('share-hide');
+                document.getElementById('trip-general-memo').readOnly = true; showTripDetail(shareId, 'Shared Trip');
             } else {
                 const { data: { session } } = await _supabase.auth.getSession();
                 if (session) { currentUser = session.user; showApp(); } else { showAuth(); }
