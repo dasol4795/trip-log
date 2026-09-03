@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>트래블로그 - 정산 가계부</title>
+    <title>트래블로그 - 여행별 스마트 정산</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -11,7 +11,6 @@
         body { font-family: 'Pretendard', sans-serif; -webkit-tap-highlight-color: transparent; background-color: #f8fafc; }
         .tab-active { color: #2563eb !important; font-weight: 800; border-bottom: 4px solid #2563eb; }
         .form-input { background-color: #ffffff; border: 2px solid #f1f5f9; border-radius: 1.25rem; padding: 1rem 1.25rem; width: 100%; font-weight: 600; }
-        .form-input:focus { border-color: #3b82f6; outline: none; }
         .toggle-btn { transition: all 0.2s; font-weight: 800; border-radius: 1rem; padding: 0.5rem 1rem; font-size: 0.75rem; }
         .active-blue { background-color: #2563eb; color: white; }
         .active-cash { background-color: #f59e0b; color: white; }
@@ -54,15 +53,15 @@
             <!-- 기록 탭 -->
             <section id="tab-input" class="hidden space-y-4">
                 <div id="no-trip-msg" class="bg-white p-12 rounded-[2.5rem] text-center border-2 border-dashed border-slate-200 hidden">
-                    <p class="text-slate-400 mb-6 font-bold">선택된 여행이 없습니다.</p>
+                    <p class="text-slate-400 mb-6 font-bold">기록 중인 여행이 없습니다.</p>
                     <button onclick="showTab('list')" class="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold">여행 목록으로</button>
                 </div>
                 <div id="input-form" class="hidden bg-white p-7 rounded-[2.5rem] shadow-xl border border-slate-100 space-y-6">
                     <div class="flex justify-between items-center pb-4 border-b">
                         <h2 id="current-trip-name" class="text-xl font-black text-slate-800 truncate pr-2"></h2>
                         <div class="flex bg-slate-100 p-1 rounded-xl">
-                            <button id="type-pre" onclick="setExpType('사전')" class="px-4 py-1.5 text-xs rounded-lg font-black">사전</button>
-                            <button id="type-act" onclick="setExpType('현지')" class="px-4 py-1.5 text-xs rounded-lg font-black">현지</button>
+                            <button id="type-pre" onclick="setExpType('사전')" class="px-4 py-1.5 text-xs rounded-lg font-black transition-all">사전</button>
+                            <button id="type-act" onclick="setExpType('현지')" class="px-4 py-1.5 text-xs rounded-lg font-black transition-all">현지</button>
                         </div>
                     </div>
                     <div class="space-y-4">
@@ -96,15 +95,22 @@
 
             <!-- 정산 탭 -->
             <section id="tab-settle" class="hidden space-y-4">
-                <h2 class="font-black text-2xl text-slate-800 px-2 mb-4">최종 정산서</h2>
+                <div class="px-2 mb-4">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Settlement for</p>
+                    <h2 id="settle-trip-name" class="font-black text-2xl text-slate-800">선택된 여행 없음</h2>
+                </div>
                 <div id="settle-result-container" class="space-y-4 pb-20"></div>
             </section>
 
             <!-- 상세 탭 -->
             <section id="tab-detail" class="hidden space-y-4">
-                <div class="flex items-center gap-3 px-2">
-                    <button onclick="showTab('list')" class="bg-white p-2 rounded-xl shadow-sm text-slate-400 font-bold">←</button>
-                    <h2 id="detail-title" class="font-black text-2xl text-slate-800 truncate"></h2>
+                <div class="flex items-center justify-between px-2">
+                    <div class="flex items-center gap-3">
+                        <button onclick="showTab('list')" class="bg-white p-2 rounded-xl shadow-sm text-slate-400 font-bold">←</button>
+                        <h2 id="detail-title" class="font-black text-2xl text-slate-800 truncate max-w-[150px]"></h2>
+                    </div>
+                    <!-- 상세페이지에서 바로 정산으로 연결 -->
+                    <button onclick="goToSettleFromDetail()" class="text-xs font-bold bg-blue-50 text-blue-600 px-4 py-2 rounded-xl">정산 확인</button>
                 </div>
                 <div class="bg-amber-50 p-6 rounded-[2.5rem] border border-amber-100 shadow-sm mx-1">
                     <textarea id="trip-general-memo" onchange="updateTripMemo()" placeholder="여행 전체 메모..." class="w-full bg-transparent border-none text-sm text-amber-800 font-medium h-24 focus:outline-none"></textarea>
@@ -132,6 +138,7 @@
         let currentTripName = localStorage.getItem('lastTripName');
         let currentTripMembers = [];
         let viewingTripId = null;
+        let viewingTripName = '';
         let selectedExpType = '현지';
         let selectedMethod = '현금';
         let selectedPayer = '';
@@ -175,7 +182,7 @@
             ['input', 'list', 'settle'].forEach(id => {
                 const btn = document.getElementById(`tab-btn-${id}`);
                 if (btn) {
-                    if (tabName === id) btn.classList.add('tab-active');
+                    if (tabName === id || (tabName === 'detail' && id === 'list')) btn.classList.add('tab-active');
                     else btn.classList.remove('tab-active');
                 }
             });
@@ -211,10 +218,11 @@
                 container.innerHTML += `
                     <div class="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm ${trip.is_completed?'opacity-50':''}">
                         <div class="flex justify-between items-start mb-4">
-                            <div onclick="showTripDetail(${trip.id}, '${trip.title}')" class="flex-1 cursor-pointer">
+                            <div onclick="showTripDetail(${trip.id}, '${trip.title}')" class="flex-1 cursor-pointer pr-4">
                                 <h3 class="font-black text-slate-800 text-lg">${trip.title} ${trip.is_completed?'✅':''}</h3>
+                                <p class="text-[10px] font-bold text-slate-300 mt-1 uppercase">Show details & settle</p>
                             </div>
-                            ${!trip.is_completed ? `<button onclick="selectTrip(${trip.id}, '${trip.title}')" class="px-5 py-2.5 rounded-2xl text-xs font-black ${isActive ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400'}">${isActive ? '기록 중' : '기록 선택'}</button>` : ''}
+                            ${!trip.is_completed ? `<button onclick="selectTrip(${trip.id}, '${trip.title}')" class="px-5 py-2.5 rounded-2xl text-[10px] font-black shrink-0 ${isActive ? 'bg-blue-600 text-white shadow-lg' : 'bg-slate-100 text-slate-400'}">${isActive ? '기록 중' : '기록 선택'}</button>` : ''}
                         </div>
                     </div>`;
             });
@@ -238,14 +246,12 @@
             if (data) loadTrips();
         }
 
-        // 6. 지출 및 정산 함수
+        // 6. 입력 및 정산 함수
         async function refreshInputTab() {
             if (currentTripId) {
                 document.getElementById('input-form').classList.remove('hidden');
                 document.getElementById('no-trip-msg').classList.add('hidden');
                 document.getElementById('current-trip-name').innerText = currentTripName;
-                document.getElementById('exp-date').valueAsDate = new Date();
-                
                 const { data: trip } = await _supabase.from('trips').select('members').eq('id', currentTripId).single();
                 currentTripMembers = trip?.members || [];
                 renderMemberChips();
@@ -260,17 +266,14 @@
             const payerCont = document.getElementById('payer-list');
             const splitCont = document.getElementById('split-list');
             payerCont.innerHTML = ''; splitCont.innerHTML = '';
-
             if (selectedPayer === '' && currentTripMembers.length > 0) selectedPayer = currentTripMembers[0].name;
             if (selectedSplitMembers.length === 0) selectedSplitMembers = currentTripMembers.map(m => m.name);
-
             currentTripMembers.forEach(m => {
                 const pChip = document.createElement('div');
                 pChip.className = `member-chip ${selectedPayer === m.name ? 'chip-selected' : 'chip-unselected'}`;
                 pChip.innerText = m.name;
                 pChip.onclick = () => { selectedPayer = m.name; renderMemberChips(); };
                 payerCont.appendChild(pChip);
-
                 const sChip = document.createElement('div');
                 sChip.className = `member-chip ${selectedSplitMembers.includes(m.name) ? 'chip-selected' : 'chip-unselected'}`;
                 sChip.innerText = m.name;
@@ -289,25 +292,34 @@
             if (!name || !amount) return;
             const btn = document.getElementById('save-btn');
             btn.innerText = "저장 중...";
-            const { error } = await _supabase.from('expenses').insert([{
+            await _supabase.from('expenses').insert([{
                 trip_id: currentTripId, item_name: name, amount, paid_by: selectedPayer,
                 split_members: selectedSplitMembers, spent_at: document.getElementById('exp-date').value,
                 payment_method: selectedMethod, memo: document.getElementById('exp-memo').value, expense_type: selectedExpType
             }]);
-            if (error) alert('실패');
-            else {
-                document.getElementById('exp-name').value = '';
-                document.getElementById('exp-amount').value = '';
-                btn.innerText = "저장 완료!";
-                setTimeout(() => { btn.innerText = "기록 저장"; }, 1000);
-            }
+            document.getElementById('exp-name').value = '';
+            document.getElementById('exp-amount').value = '';
+            btn.innerText = "저장 완료!";
+            setTimeout(() => { btn.innerText = "기록 저장"; }, 1000);
+        }
+
+        // 상세페이지에서 해당 여행 정산으로 바로 넘어가기
+        function goToSettleFromDetail() {
+            // 현재 보고 있는 여행을 정산 대상으로 설정
+            currentTripId = viewingTripId;
+            currentTripName = viewingTripName;
+            showTab('settle');
         }
 
         async function calculateSettlement() {
-            const tripId = localStorage.getItem('lastTripId');
+            // 활성화된 여행 ID 사용
+            const tripId = currentTripId || localStorage.getItem('lastTripId');
             if (!tripId) return;
+
             const { data: trip } = await _supabase.from('trips').select('*').eq('id', tripId).single();
             const { data: expenses } = await _supabase.from('expenses').select('*').eq('trip_id', tripId);
+            
+            document.getElementById('settle-trip-name').innerText = trip.title;
             const container = document.getElementById('settle-result-container');
             container.innerHTML = '';
 
@@ -332,19 +344,21 @@
                     const payAmt = Math.min(g.amt, r.amt);
                     const acc = trip.members.find(m => m.name === r.name)?.account || '계좌 없음';
                     container.innerHTML += `
-                        <div class="bg-white p-7 rounded-[2.5rem] shadow-xl">
-                            <div class="text-xl font-black"><span class="text-red-500">${g.name}</span> → <span class="text-blue-600">${r.name}</span></div>
-                            <div class="text-3xl font-black my-2">${Math.round(payAmt).toLocaleString()}원</div>
-                            <div class="text-xs text-slate-400">🏦 ${acc}</div>
+                        <div class="bg-white p-7 rounded-[2.5rem] shadow-xl border border-slate-50">
+                            <div class="text-xl font-black mb-1"><span class="text-red-500">${g.name}</span> → <span class="text-blue-600">${r.name}</span></div>
+                            <div class="text-3xl font-black mb-3">${Math.round(payAmt).toLocaleString()}원</div>
+                            <div class="bg-slate-50 p-4 rounded-2xl text-xs font-bold text-slate-400 italic">🏦 ${acc}</div>
                         </div>`;
                     g.amt -= payAmt; r.amt -= payAmt;
                 });
             });
-            if (!container.innerHTML) container.innerHTML = '<p class="text-center py-20">내역 없음</p>';
+            if (!container.innerHTML) container.innerHTML = '<p class="text-center py-24 text-slate-400 font-bold">정산할 내역이 없습니다.</p>';
         }
 
         async function showTripDetail(tripId, title) {
-            viewingTripId = tripId; showTab('detail');
+            viewingTripId = tripId; 
+            viewingTripName = title;
+            showTab('detail');
             document.getElementById('detail-title').innerText = title;
             const { data: tripData } = await _supabase.from('trips').select('memo').eq('id', tripId).single();
             const { data: expenses } = await _supabase.from('expenses').select('*').eq('trip_id', tripId).order('spent_at', { ascending: false });
@@ -355,12 +369,13 @@
                 if (exp.expense_type === '사전') pre += Number(exp.amount); else act += Number(exp.amount);
                 container.innerHTML += `
                     <div class="expense-row text-xs">
-                        <div class="text-slate-300 font-bold">${exp.spent_at.slice(5)}</div>
+                        <div class="text-slate-300 font-bold">${exp.spent_at?.slice(5) || '00-00'}</div>
                         <div>
                             <div class="font-black text-slate-700">${exp.item_name}</div>
-                            <div class="text-[10px] text-slate-400">${exp.paid_by} 결제</div>
+                            <div class="text-[9px] text-slate-400">${exp.paid_by} 결제 | ${exp.split_members?.length}명 정산</div>
                         </div>
                         <div class="text-right font-black ${exp.expense_type==='사전'?'text-slate-400':'text-blue-600'}">${Number(exp.amount).toLocaleString()}</div>
+                        <button onclick="deleteExp(${exp.id},${tripId},'${title}')" class="text-slate-200">✕</button>
                     </div>`;
             });
             document.getElementById('sum-pre').innerText = pre.toLocaleString();
@@ -372,15 +387,13 @@
             await _supabase.from('trips').update({ memo: v }).eq('id', viewingTripId);
         }
 
-        // 7. 초기화 실행 (가장 마지막에 배치)
+        async function updateExp(id, f, v) { await _supabase.from('expenses').update({ [f]: v }).eq('id', id); }
+        async function deleteExp(id, tid, t) { if(confirm('삭제할까요?')) { await _supabase.from('expenses').delete().eq('id', id); showTripDetail(tid, t); } }
+
+        // 7. 초기화 실행
         window.onload = async function() {
             const { data: { session } } = await _supabase.auth.getSession();
-            if (session) {
-                currentUser = session.user;
-                showApp();
-            } else {
-                showAuth();
-            }
+            if (session) { currentUser = session.user; showApp(); } else { showAuth(); }
         };
     </script>
 </body>
